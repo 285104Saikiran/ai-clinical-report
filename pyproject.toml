@@ -6,17 +6,22 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "chromadb>=1.5.9",
-    "crewai[litellm]>=1.15.27",
+    "crewai>=1.15.27",
+    "google-genai>=2.30.0",
+    "httpx>=0.28.1",
     "langchain-chroma>=1.1.0",
     "langchain-core>=1.6.9",
+    "langchain-huggingface>=1.2.3",
     "langchain-text-splitters>=1.1.3",
     "pydantic>=2.12.5",
     "pypdf>=6.20.0",
     "python-dotenv>=1.2.4",
+    "sentence-transformers>=6.1.0",
     "streamlit>=1.65.0",
 ]
 
 [project.scripts]
+gemini-smoke = 'clinical_report_assistant.gemini_smoke:main'
 clinical-report-assistant = "clinical_report_assistant:main"
 
 [build-system]

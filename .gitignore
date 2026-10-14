@@ -37,6 +37,8 @@ reports/
 chroma/
 chroma_db/
 .chroma/
+data/chroma_guidelines/
+data/local_results/
 
 # Test, lint, type-check, and coverage caches
 .pytest_cache/

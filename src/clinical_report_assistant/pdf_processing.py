@@ -67,56 +67,56 @@ def process_pdf(
     *,
     max_size_bytes: int = DEFAULT_MAX_PDF_SIZE_BYTES,
 ) -> PdfDocument:
-    '''Validate and extract an uploaded PDF entirely in memory.'''
+    """Validate and extract an uploaded PDF entirely in memory."""
 
     if max_size_bytes <= 0:
-        raise ValueError('max_size_bytes must be greater than zero.')
+        raise ValueError("max_size_bytes must be greater than zero.")
     if not isinstance(uploaded_bytes, bytes):
-        raise TypeError('uploaded_bytes must be bytes.')
+        raise TypeError("uploaded_bytes must be bytes.")
     if not original_filename or not original_filename.strip():
-        raise PdfIngestionError('The uploaded file must have a filename.')
+        raise PdfIngestionError("The uploaded file must have a filename.")
     if not uploaded_bytes:
-        raise EmptyPdfError('The uploaded file is empty.')
+        raise EmptyPdfError("The uploaded file is empty.")
     if len(uploaded_bytes) > max_size_bytes:
         limit_mib = max_size_bytes / (1024 * 1024)
         raise PdfTooLargeError(
-            f'The uploaded file exceeds the {limit_mib:g} MiB size limit.'
+            f"The uploaded file exceeds the {limit_mib:g} MiB size limit."
         )
-    if b'%PDF-' not in uploaded_bytes[:_PDF_HEADER_SEARCH_BYTES]:
-        raise NonPdfError('The uploaded content is not a PDF file.')
+    if b"%PDF-" not in uploaded_bytes[:_PDF_HEADER_SEARCH_BYTES]:
+        raise NonPdfError("The uploaded content is not a PDF file.")
 
     try:
         reader = PdfReader(BytesIO(uploaded_bytes), strict=False)
         if reader.is_encrypted:
             raise EncryptedPdfError(
-                'Encrypted PDFs are not supported. Upload an unencrypted copy.'
+                "Encrypted PDFs are not supported. Upload an unencrypted copy."
             )
         page_count = len(reader.pages)
     except EncryptedPdfError:
         raise
     except (PdfReadError, EOFError, ValueError, TypeError) as exc:
         raise CorruptPdfError(
-            'The PDF is malformed or corrupt and could not be read.'
+            "The PDF is malformed or corrupt and could not be read."
         ) from exc
 
     if page_count == 0:
-        raise CorruptPdfError('The PDF contains no pages.')
+        raise CorruptPdfError("The PDF contains no pages.")
 
     pages: list[PdfPage] = []
     document_warnings: list[str] = []
 
     for page_number, page in enumerate(reader.pages, start=1):
         try:
-            text = page.extract_text() or ''
+            text = page.extract_text() or ""
         except Exception as exc:
             raise PdfExtractionError(
-                f'Text extraction failed on page {page_number}; the PDF may be corrupt.'
+                f"Text extraction failed on page {page_number}; the PDF may be corrupt."
             ) from exc
 
         page_warnings: list[str] = []
         if not text.strip():
             warning = (
-                f'Page {page_number} contains no extractable text and may require OCR.'
+                f"Page {page_number} contains no extractable text and may require OCR."
             )
             page_warnings.append(warning)
             document_warnings.append(warning)
@@ -127,8 +127,8 @@ def process_pdf(
     if all(not page.text.strip() for page in pages):
         document_warnings.insert(
             0,
-            'This PDF contains no extractable text. It may be scanned or image-only '
-            'and require OCR; OCR is not included in this demo.',
+            "This PDF contains no extractable text. It may be scanned or image-only "
+            "and require OCR; OCR is not included in this demo.",
         )
 
     return PdfDocument(
